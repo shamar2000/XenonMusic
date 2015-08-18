@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/XenonMusic.iml" filepath="$PROJECT_DIR$/XenonMusic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/XenonMusic.iml" filepath="$PROJECT_DIR$/XenonMusic.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
