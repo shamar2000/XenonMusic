@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Song> mSongList;
     private ListView mSongView;
+    private SongAdapter mSongAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +28,12 @@ public class MainActivity extends AppCompatActivity {
         getSongList();
     }
 
-    private void init() {
+    public void init() {
         mSongView = (ListView) findViewById(R.id.song_list);
         mSongList = new ArrayList<>();
+
+        mSongAdapter = new SongAdapter(this, mSongList);
+        mSongView.setAdapter(mSongAdapter);
     }
 
     public void getSongList() {
