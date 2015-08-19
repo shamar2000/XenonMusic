@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="background">#FF330000</color>
+    <color name="song_name_title">#FFFFFF99</color>
 </resources>
