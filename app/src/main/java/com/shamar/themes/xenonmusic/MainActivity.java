@@ -1,9 +1,14 @@
 package com.shamar.themes.xenonmusic;
 
+import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -20,6 +25,10 @@ public class MainActivity extends AppCompatActivity {
     private ListView mSongView;
     private SongAdapter mSongAdapter;
 
+    private MusicService mMusicSrv;
+    private Intent mPlayIntent;
+    private boolean mMusicBound = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,13 +37,47 @@ public class MainActivity extends AppCompatActivity {
         getSongList();
     }
 
-    public void init() {
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mPlayIntent == null) {
+            mPlayIntent = new Intent(this, MusicService.class);
+            bindService(mPlayIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            startService(mPlayIntent);
+        }
+    }
+
+    private void init() {
         mSongView = (ListView) findViewById(R.id.song_list);
         mSongList = new ArrayList<>();
-
         mSongAdapter = new SongAdapter(this, mSongList);
         mSongView.setAdapter(mSongAdapter);
     }
+
+    /**
+     * We are going to play the music in the Service class, but control it from the Activity class,
+     * where the application's user interface operates. To accomplish this, we will have to bind to
+     * the Service class
+     */
+
+    // connect to the service
+    private ServiceConnection musicConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+            // get service
+            mMusicSrv = binder.getService();
+            // pass list
+            mMusicSrv.setList(mSongList);
+            mMusicBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mMusicBound = false;
+        }
+    };
 
     public void getSongList() {
         // retrieve song information
