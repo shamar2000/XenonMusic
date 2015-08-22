@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -37,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
         getSongList();
     }
 
+    /**
+     * We want to start the @Service instance when the @Activity instance starts
+     */
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -55,9 +60,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * We are going to play the music in the Service class, but control it from the Activity class,
-     * where the application's user interface operates. To accomplish this, we will have to bind to
-     * the Service class
+     * We set the song position as the tag for each item in the list view when we defined the
+     * @SongAdapter class. We retrieve it here and pass it to the Service instance before calling the
+     * method to start the playback.
+     *
+     * @param v view that was clicked
+     */
+    public void onSongPicked(View v) {
+        mMusicSrv.setSong(Integer.parseInt(v.getTag().toString()));
+        mMusicSrv.playSong();
+    }
+
+    /**
+     * We are going to play the music in the @MusicService class, but control it from the @MainActivity
+     * class, where the application's user interface operates. To accomplish this, we will have to
+     * bind to the @MusicService class
      */
 
     // connect to the service
@@ -110,6 +127,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        stopService(mPlayIntent);
+        mMusicSrv=null;
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -122,6 +146,14 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_close:
+                stopService(mPlayIntent);
+                mMusicSrv = null;
+                System.exit(0);
+                break;
+        }
 
         return super.onOptionsItemSelected(item);
     }

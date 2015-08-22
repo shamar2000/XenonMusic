@@ -1,12 +1,16 @@
 package com.shamar.themes.xenonmusic;
 
 import android.app.Service;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.provider.MediaStore;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -42,6 +46,38 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         mSongs = Songs;
     }
 
+    /**
+     * Called when the user selects a song from the list
+     *
+     * @param songIndex the current song position
+     */
+    public void setSong(int songIndex) {
+        mSongPos = songIndex;
+    }
+
+    public void playSong() {
+        mPlayer.reset();
+        // get song
+        Song playSong = mSongs.get(mSongPos);
+        // get ID
+        long currSong = playSong.getmId();
+        // set URI
+        Uri trackURI = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, currSong);
+
+        /**
+         * Set URI as the data source, however an error may pop up
+         *
+         * catch it as an exception
+         */
+        try {
+            mPlayer.setDataSource(getApplicationContext(), trackURI);
+        } catch (Exception e) {
+            Log.d("MUSIC SERVICE", "Error setting data source", e);
+
+        }
+        mPlayer.prepareAsync();
+    }
+
     public class MusicBinder extends Binder {
         MusicService getService() {
          return MusicService.this;
@@ -63,6 +99,12 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         return mMusicBind;
     }
 
+    /**
+     *  Release the resources when the @Service method is unbound
+     *
+     *  This will execute when the user exits the app, at which point
+     *  we will stop the service
+     */
     @Override
     public boolean onUnbind(Intent intent) {
         mPlayer.stop();
@@ -82,6 +124,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-
+        // start song playback
+        mp.start();
     }
 }
