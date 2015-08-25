@@ -1,5 +1,7 @@
 package com.shamar.themes.xenonmusic;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -42,8 +44,87 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         mPlayer = new MediaPlayer();
     }
 
+    /**
+     * Remember that the media playback is happening in the Service class, but that the user
+     * interface comes from the Activity class. We bound the Activity instance to the Service
+     *
+     * instance, so that we could control playback from the user interface.
+     * The methods in our Activity class that we added to implement the MediaPlayerControl interface
+     *
+     * will be called when the user attempts to control playback. We will need the Service class to
+     * act on this control
+     *
+     */
+
+    public int getPosition(){
+        return mPlayer.getCurrentPosition();
+    }
+
+    public int getDuration(){
+        return mPlayer.getDuration();
+    }
+
+    public boolean isPlaying(){
+        return mPlayer.isPlaying();
+    }
+
+    public void pausePlayer(){
+        mPlayer.pause();
+    }
+
+    public void seekTo(int posn){
+        mPlayer.seekTo(posn);
+    }
+
+    public void go(){
+        mPlayer.start();
+    }
+
+    /**
+     * @playNext :
+     * We decrement the song index variable, check that we haven't gone outside the range of the
+     * list, and call the playSong method we added. Now add the method to skip to the next track
+     *
+     * @playPrev :
+     * This is analogous to the method for playing the previous track at the moment
+     */
+    public void playPrev() {
+        mSongPos--;
+        if (mSongPos < 0)
+            mSongPos = mSongs.size() - 1;
+        playSong();
+    }
+
+    public void playNext() {
+        mSongPos++;
+        if (mSongPos >= mSongs.size())
+            mSongPos = 0;
+        playSong();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mMusicBind;
+    }
+
+    private void initMediaPlayer() {
+        // allows playback when the device becomes idle
+        mPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        // set the stream type to music
+        mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mPlayer.setOnCompletionListener(this);
+        mPlayer.setOnErrorListener(this);
+        mPlayer.setOnPreparedListener(this);
+    }
+
     public void setList(ArrayList<Song> Songs) {
         mSongs = Songs;
+    }
+
+    public class MusicBinder extends Binder {
+        MusicService getService() {
+            return MusicService.this;
+        }
     }
 
     /**
@@ -78,27 +159,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         mPlayer.prepareAsync();
     }
 
-    public class MusicBinder extends Binder {
-        MusicService getService() {
-         return MusicService.this;
-        }
-    }
-
-    private void initMediaPlayer() {
-        // allows playback when the device becomes idle
-        mPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        // set the stream type to music
-        mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mPlayer.setOnCompletionListener(this);
-        mPlayer.setOnErrorListener(this);
-        mPlayer.setOnPreparedListener(this);
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mMusicBind;
-    }
-
     /**
      *  Release the resources when the @Service method is unbound
      *
@@ -111,8 +171,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         mPlayer.release();
         return false;
     }
-
-    //kddmmdfm,fkf
 
     @Override
     public void onCompletion(MediaPlayer mp) {
@@ -128,5 +186,20 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public void onPrepared(MediaPlayer mp) {
         // start song playback
         mp.start();
+
+        Intent notIntent = new Intent(this, MainActivity.class);
+        notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendIntent = PendingIntent.getActivity(this, 0, notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentIntent(pendIntent)
+                .setSmallIcon(R.drawable.play)
+                .setTicker(songTitle)
+                .setOngoing(true)
+                .setContentTitle("Playing")
+        .setContentText("");
+        Notification not = builder.build();
+
+        startForeground(NOTIFY_ID, not);
     }
 }

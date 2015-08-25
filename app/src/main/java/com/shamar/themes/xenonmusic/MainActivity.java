@@ -15,18 +15,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.MediaController.MediaPlayerControl;
+
+import com.shamar.themes.xenonmusic.MusicService.MusicBinder;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MediaPlayerControl {
 
     private ArrayList<Song> mSongList;
     private ListView mSongView;
     private SongAdapter mSongAdapter;
 
     private MusicService mMusicSrv;
+    private MusicController mMusicController;
     private Intent mPlayIntent;
     private boolean mMusicBound = false;
 
@@ -36,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         init();
         getSongList();
+        setMusicController();
     }
 
     /**
@@ -71,6 +76,38 @@ public class MainActivity extends AppCompatActivity {
         mMusicSrv.playSong();
     }
 
+    private void setMusicController() {
+        // set up the music controller widget (play, pause, skip, etc..)
+        mMusicController = new MusicController(this);
+        // set up Prev/Next controllers
+        mMusicController.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playNext();
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playPrev();
+            }
+        });
+        mMusicController.setMediaPlayer(this);
+        mMusicController.setAnchorView(findViewById(R.id.song_list));
+        mMusicController.setEnabled(true);
+    }
+
+    // play next track
+    private void playNext() {
+        mMusicSrv.playNext();
+        mMusicController.show(0);
+    }
+
+    // play previous track
+    private void playPrev() {
+        mMusicSrv.playPrev();
+        mMusicController.show(0);
+    }
+
     /**
      * We are going to play the music in the @MusicService class, but control it from the @MainActivity
      * class, where the application's user interface operates. To accomplish this, we will have to
@@ -82,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+            MusicBinder binder = (MusicBinder) service;
             // get service
             mMusicSrv = binder.getService();
             // pass list
@@ -156,5 +193,75 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void start() {
+        mMusicSrv.go();
+    }
+
+    @Override
+    public void pause() {
+        mMusicSrv.pausePlayer();
+    }
+
+    /**
+     * @getCurrentPosition, @getDuration :
+     * The conditional tests are to avoid various exceptions that may occur when using the
+     * MediaPlayer and MediaController classes. If you attempt to enhance the app in any way,
+     *
+     * you will likely find that you need to take such steps since the media playback classes
+     * throw lots of exceptions. Notice that we call the @getPosition method of the Service class.
+     *
+     */
+    @Override
+    public int getDuration() {
+        if (mMusicSrv != null && mMusicBound && mMusicSrv.isPlaying())
+            return mMusicSrv.getDuration();
+        else return 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        if (mMusicSrv != null && mMusicBound && mMusicSrv.isPlaying())
+            return mMusicSrv.getPosition();
+        else return 0;
+    }
+
+    @Override
+    public void seekTo(int pos) {
+        mMusicSrv.seekTo(pos);
+    }
+
+    @Override
+    public boolean isPlaying() {
+        if (mMusicSrv != null && mMusicBound)
+            return mMusicSrv.isPlaying();
+        return false;
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return true;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
     }
 }

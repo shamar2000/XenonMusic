@@ -24,10 +24,7 @@
         </activity>
 
         <!-- services -->
-        <service
-            android:name=".MusicService"
-            android:enabled="false"
-            android:exported="false" />
+        <service android:name="com.shamar.themes.xenonmusic.MusicService"/>
     </application>
 
 </manifest>
