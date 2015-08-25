@@ -112,6 +112,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         return false;
     }
 
+    //kddmmdfm,fkf
+
     @Override
     public void onCompletion(MediaPlayer mp) {
 
