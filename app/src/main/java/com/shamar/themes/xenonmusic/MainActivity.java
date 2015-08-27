@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -16,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.MediaController.MediaPlayerControl;
+import android.widget.TextView;
 
 import com.shamar.themes.xenonmusic.MusicService.MusicBinder;
 
@@ -26,13 +28,21 @@ import java.util.Comparator;
 public class MainActivity extends AppCompatActivity implements MediaPlayerControl {
 
     private ArrayList<Song> mSongList;
-    private ListView mSongView;
-    private SongAdapter mSongAdapter;
+    private ListView        mSongView;
+    private SongAdapter     mSongAdapter;
 
-    private MusicService mMusicSrv;
+    private TextView        mSongName = null,
+                            mSongArtist = null;
+
+    private Typeface        mProximaNovaLight = null,
+                            mProximaNovaSemiBold = null;
+
+    private MusicService    mMusicSrv;
     private MusicController mMusicController;
-    private Intent mPlayIntent;
-    private boolean mMusicBound = false;
+    private Intent          mPlayIntent;
+    private boolean         mMusicBound = false,
+                            mPaused = false,
+                            mPlaybackPaused = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         init();
         getSongList();
         setMusicController();
+        setFonts();
     }
 
     /**
@@ -60,8 +71,25 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     private void init() {
         mSongView = (ListView) findViewById(R.id.song_list);
         mSongList = new ArrayList<>();
+
         mSongAdapter = new SongAdapter(this, mSongList);
         mSongView.setAdapter(mSongAdapter);
+    }
+
+    /**
+     * Setup our custom fonts for use.
+     *
+     * TODO: Fix this shit, it doesn't work. It causes the app to CRASH.
+     */
+    private void setFonts() {
+        mProximaNovaLight = Typeface.createFromAsset(getAssets(), "PN_Light.ttf");
+        mProximaNovaSemiBold = Typeface.createFromAsset(getAssets(), "PN_SBold.ttf");
+
+        mSongName = (TextView) findViewById(R.id.song_title);
+        mSongArtist = (TextView) findViewById(R.id.song_artist);
+
+        mSongName.setTypeface(mProximaNovaSemiBold);
+        mSongArtist.setTypeface(mProximaNovaLight);
     }
 
     /**
@@ -74,6 +102,11 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     public void onSongPicked(View v) {
         mMusicSrv.setSong(Integer.parseInt(v.getTag().toString()));
         mMusicSrv.playSong();
+        if (mPlaybackPaused) {
+            setMusicController();
+            mPlaybackPaused = false;
+        }
+        mMusicController.show(0);
     }
 
     private void setMusicController() {
@@ -99,12 +132,20 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     // play next track
     private void playNext() {
         mMusicSrv.playNext();
+        if (mPlaybackPaused) {
+            setMusicController();
+            mPlaybackPaused = false;
+        }
         mMusicController.show(0);
     }
 
     // play previous track
     private void playPrev() {
         mMusicSrv.playPrev();
+        if (mPlaybackPaused) {
+            setMusicController();
+            mPlaybackPaused = false;
+        }
         mMusicController.show(0);
     }
 
@@ -190,6 +231,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                 mMusicSrv = null;
                 System.exit(0);
                 break;
+            case R.id.action_shuffle:
+                mMusicSrv.setShuffle();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -202,7 +246,37 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
     @Override
     public void pause() {
+        mPlaybackPaused = true;
         mMusicSrv.pausePlayer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPaused = true;
+    }
+
+    /**
+     * @onResume
+     * This will ensure that the music controller displays when the user returns to the app.
+     *
+     * @onStop
+     * This hides the music controller when the user exits the app
+     */
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mPaused) {
+            setMusicController();
+            mPaused = false;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        mMusicController.hide();
+        super.onStop();
     }
 
     /**
@@ -263,5 +337,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     @Override
     public int getAudioSessionId() {
         return 0;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
