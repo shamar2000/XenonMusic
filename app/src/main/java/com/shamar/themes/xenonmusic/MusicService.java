@@ -15,18 +15,24 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MusicService extends Service implements MediaPlayer.OnPreparedListener,
         MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     // media player
-    private MediaPlayer mPlayer;
+    private MediaPlayer     mPlayer;
     // song list
     private ArrayList<Song> mSongs;
     // song position
-    private int mSongPos;
+    private int             mSongPos;
 
-    private final IBinder mMusicBind = new MusicBinder();
+    private String           songTitle = "";
+    private static final int NOTIFY_ID = 1;
+    private boolean          mShuffle = false;
+    private Random           mRand;
+
+    private final IBinder    mMusicBind = new MusicBinder();
 
 
     public MusicService() {
@@ -41,7 +47,14 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     private void init() {
         mSongPos = 0;
+        mRand = new Random();
         mPlayer = new MediaPlayer();
+    }
+
+    public void setShuffle() {
+        if (mShuffle)
+            mShuffle = false;
+        mShuffle = true;
     }
 
     /**
@@ -88,6 +101,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
      * @playPrev :
      * This is analogous to the method for playing the previous track at the moment
      */
+
     public void playPrev() {
         mSongPos--;
         if (mSongPos < 0)
@@ -96,6 +110,19 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     public void playNext() {
+
+        /**
+         * If the shuffle flag is on, we choose a new song from the list at random, making sure we
+         * don't repeat the last song played
+         */
+
+        if (mShuffle) {
+            int newSong = mSongPos;
+            while (newSong == mSongPos) {
+                newSong = mRand.nextInt(mSongs.size());
+            }
+            mSongPos = newSong;
+        }
         mSongPos++;
         if (mSongPos >= mSongs.size())
             mSongPos = 0;
@@ -132,6 +159,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
      *
      * @param songIndex the current song position
      */
+
     public void setSong(int songIndex) {
         mSongPos = songIndex;
     }
@@ -150,6 +178,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
          *
          * catch it as an exception
          */
+
         try {
             mPlayer.setDataSource(getApplicationContext(), trackURI);
         } catch (Exception e) {
@@ -165,6 +194,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
      *  This will execute when the user exits the app, at which point
      *  we will stop the service
      */
+
     @Override
     public boolean onUnbind(Intent intent) {
         mPlayer.stop();
@@ -174,11 +204,15 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        if (mPlayer.getCurrentPosition() > 0) {
+            mp.reset();
+            playNext();
+        }
     }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        mp.reset();
         return false;
     }
 
@@ -187,19 +221,34 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         // start song playback
         mp.start();
 
+        Song currSong = mSongs.get(mSongPos);
+        String currSongArtist = currSong.getmArtist();
+        String currSongTitle = currSong.getmTitle();
+
         Intent notIntent = new Intent(this, MainActivity.class);
         notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendIntent = PendingIntent.getActivity(this, 0, notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        /**
+         * The PendingIntent class will take the user back to the main Activity class when they
+         * select the notification
+         */
+        PendingIntent pendIntent = PendingIntent.getActivity(this, 0, notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification.Builder builder = new Notification.Builder(this);
         builder.setContentIntent(pendIntent)
-                .setSmallIcon(R.drawable.play)
+                .setSmallIcon(R.drawable.ic_play_notification)
                 .setTicker(songTitle)
                 .setOngoing(true)
-                .setContentTitle("Playing")
-        .setContentText("");
+                .setContentTitle(currSongArtist)
+                .setContentText(currSongTitle);
         Notification not = builder.build();
 
         startForeground(NOTIFY_ID, not);
     }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
+    }
+
+
 }

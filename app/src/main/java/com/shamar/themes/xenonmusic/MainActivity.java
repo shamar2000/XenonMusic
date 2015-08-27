@@ -26,13 +26,15 @@ import java.util.Comparator;
 public class MainActivity extends AppCompatActivity implements MediaPlayerControl {
 
     private ArrayList<Song> mSongList;
-    private ListView mSongView;
-    private SongAdapter mSongAdapter;
+    private ListView        mSongView;
+    private SongAdapter     mSongAdapter;
 
-    private MusicService mMusicSrv;
+    private MusicService    mMusicSrv;
     private MusicController mMusicController;
-    private Intent mPlayIntent;
-    private boolean mMusicBound = false;
+    private Intent          mPlayIntent;
+    private boolean         mMusicBound = false,
+                            mPaused = false,
+                            mPlaybackPaused = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,11 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     public void onSongPicked(View v) {
         mMusicSrv.setSong(Integer.parseInt(v.getTag().toString()));
         mMusicSrv.playSong();
+        if (mPlaybackPaused) {
+            setMusicController();
+            mPlaybackPaused = false;
+        }
+        mMusicController.show(0);
     }
 
     private void setMusicController() {
@@ -99,12 +106,20 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     // play next track
     private void playNext() {
         mMusicSrv.playNext();
+        if (mPlaybackPaused) {
+            setMusicController();
+            mPlaybackPaused = false;
+        }
         mMusicController.show(0);
     }
 
     // play previous track
     private void playPrev() {
         mMusicSrv.playPrev();
+        if (mPlaybackPaused) {
+            setMusicController();
+            mPlaybackPaused = false;
+        }
         mMusicController.show(0);
     }
 
@@ -190,6 +205,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                 mMusicSrv = null;
                 System.exit(0);
                 break;
+            case R.id.action_shuffle:
+                mMusicSrv.setShuffle();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -202,7 +220,37 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
     @Override
     public void pause() {
+        mPlaybackPaused = true;
         mMusicSrv.pausePlayer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPaused = true;
+    }
+
+    /**
+     * @onResume
+     * This will ensure that the music controller displays when the user returns to the app.
+     *
+     * @onStop
+     * This hides the music controller when the user exits the app
+     */
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mPaused) {
+            setMusicController();
+            mPaused = false;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        mMusicController.hide();
+        super.onStop();
     }
 
     /**
@@ -263,5 +311,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     @Override
     public int getAudioSessionId() {
         return 0;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
