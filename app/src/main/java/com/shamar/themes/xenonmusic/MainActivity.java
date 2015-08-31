@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         super.onCreate(savedInstanceState);
         // setup our custom fonts
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                .setDefaultFontPath("pnb.ttf")
+                .setDefaultFontPath("pnr.ttf")
                 .setFontAttrId(R.attr.fontPath)
                 .build());
 

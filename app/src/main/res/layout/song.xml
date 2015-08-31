@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/song_name_title"
         android:textSize="20sp"
-        fontPath="pnb.ttf" />
+        fontPath="pnsb.ttf" />
 
     <TextView
         android:id="@+id/song_artist"
