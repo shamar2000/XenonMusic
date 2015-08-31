@@ -34,9 +34,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     private TextView        mSongName = null,
                             mSongArtist = null;
 
-    private Typeface        mProximaNovaLight = null,
-                            mProximaNovaSemiBold = null;
-
     private MusicService    mMusicSrv;
     private MusicController mMusicController;
     private Intent          mPlayIntent;
@@ -48,10 +45,18 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mSongName = (TextView) findViewById(R.id.song_title);
+        mSongArtist = (TextView) findViewById(R.id.song_artist);
+
+        Typeface mProximaNovaLight = Typeface.createFromAsset(getAssets(), "fonts/pnl.ttf");
+        Typeface mProximaNovaSemiBold = Typeface.createFromAsset(getAssets(), "fonts/pnsb.ttf");
+        mSongName.setTypeface(mProximaNovaSemiBold);
+        mSongArtist.setTypeface(mProximaNovaLight);
+
         init();
         getSongList();
         setMusicController();
-        setFonts();
     }
 
     /**
@@ -74,22 +79,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
         mSongAdapter = new SongAdapter(this, mSongList);
         mSongView.setAdapter(mSongAdapter);
-    }
-
-    /**
-     * Setup our custom fonts for use.
-     *
-     * TODO: Fix this shit, it doesn't work. It causes the app to CRASH.
-     */
-    private void setFonts() {
-        mProximaNovaLight = Typeface.createFromAsset(getAssets(), "PN_Light.ttf");
-        mProximaNovaSemiBold = Typeface.createFromAsset(getAssets(), "PN_SBold.ttf");
-
-        mSongName = (TextView) findViewById(R.id.song_title);
-        mSongArtist = (TextView) findViewById(R.id.song_artist);
-
-        mSongName.setTypeface(mProximaNovaSemiBold);
-        mSongArtist.setTypeface(mProximaNovaLight);
     }
 
     /**
