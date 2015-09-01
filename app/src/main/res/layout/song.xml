@@ -1,25 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:padding="5dp"
-              android:id="@+id/song_linearlay"
-              android:onClick="onSongPicked"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="5dp"
+    android:divider="@drawable/divider"
+    android:showDividers="end"
+    android:dividerPadding="8dp"
+    android:id="@+id/song_linearlay"
+    android:onClick="onSongPicked"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/song_title"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/song_name_title"
-        android:textSize="20sp"
-        fontPath="pnsb.ttf" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/song_title"
+            android:layout_width="fill_parent"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="8dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/song_title"
+            android:textSize="17sp"
+            fontPath="pnsb.ttf" />
+
+        <ImageButton
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:paddingTop="50dp"
+            android:layout_marginRight="15dp"
+            android:layout_centerInParent="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/ic_action_overflow"
+            android:contentDescription="Menu" />
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/song_artist"
+        android:paddingBottom="15dp"
+        android:layout_marginLeft="8dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/song_name_title"
-        android:textSize="18sp" />
+        android:textColor="@color/song_artist"
+        android:textSize="13sp" />
 
 </LinearLayout>
