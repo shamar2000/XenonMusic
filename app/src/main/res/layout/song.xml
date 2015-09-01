@@ -22,7 +22,7 @@
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="8dp"
             android:layout_height="wrap_content"
-            android:textColor="@color/song_title"
+            android:textColor="@color/primary"
             android:textSize="17sp"
             fontPath="pnsb.ttf" />
 
@@ -33,7 +33,7 @@
             android:layout_marginRight="15dp"
             android:layout_centerInParent="true"
             android:layout_alignParentRight="true"
-            android:background="@drawable/ic_action_overflow"
+            android:background="@drawable/ic_overflow"
             android:contentDescription="Menu" />
 
     </RelativeLayout>
@@ -44,7 +44,7 @@
         android:layout_marginLeft="8dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/song_artist"
+        android:textColor="@color/primary_dark"
         android:textSize="13sp" />
 
 </LinearLayout>

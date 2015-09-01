@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="8dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:layout_width="64dp"
+        android:id="@+id/album_art"
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/currently_playing_song"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_height="64dp" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:orientation="vertical"
+        android:layout_toEndOf="@id/album_art"
+        android:layout_toRightOf="@id/album_art"
+        android:layout_toStartOf="@id/play_pause"
+        android:layout_toLeftOf="@id/play_pause"
+        android:layout_centerVertical="true"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/title"
+            android:text="My Favorite Song"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:contentDescription="@string/currently_playing_song"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/artist"
+            android:layout_width="wrap_content"
+            android:text="My Lovely Band"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:contentDescription="@string/currently_playing_artist"
+            android:textAppearance="?android:textAppearanceSmall"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <ImageButton
+        android:id="@+id/play_pause"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_play_notification"
+        android:contentDescription="@string/play_pause"
+        android:tint="@color/btn_accent"/>
+</RelativeLayout>

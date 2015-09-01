@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="background">#171717</color>
-    <color name="song_title">#ffffff</color>
-    <color name="song_artist">#d1d2d8</color>
+    <color name="primary">#ffffff</color>
+    <color name="primary_dark">#d1d2d8</color>
+    <color name="btn_accent">#4cff00</color>
     <color name="divider">#444444</color>
+
+    <color name="black">#000</color>
 </resources>

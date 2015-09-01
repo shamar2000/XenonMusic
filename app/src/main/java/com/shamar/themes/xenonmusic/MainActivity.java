@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
     private ArrayList<Song> mSongList;
     public ListView         mSongView;
-    public LinearLayout     mSongLinearLay;
     public SongAdapter      mSongAdapter;
 
     private MusicService    mMusicSrv;
