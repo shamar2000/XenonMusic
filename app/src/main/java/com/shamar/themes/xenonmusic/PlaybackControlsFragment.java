@@ -8,6 +8,7 @@ import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,12 +63,53 @@ public class PlaybackControlsFragment extends Fragment {
         mAlbumArt = (ImageView) rootView.findViewById(R.id.album_art);
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+                public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), FullScreenPlayerActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                MediaMetadata metadata = getActivity().getMediaController().getMetadata();
+//                if (metadata != null) {
+//                    intent.putExtra(MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION,
+//                            metadata.getDescription());
+//                }
+                startActivity(intent);
             }
         });
-
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (getActivity().getMediaController() != null) {
+            onConnected();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (getActivity().getMediaController() != null) {
+            getActivity().getMediaController().unregisterCallback(mCallback);
+        }
+    }
+
+    public void onConnected() {
+        MediaController controller = getActivity().getMediaController();
+        if (controller != null) {
+            onMetaDataChanged(controller.getMetadata());
+            onPlaybackStateChanged(controller.getPlaybackState());
+            controller.registerCallback(mCallback);
+        }
+    }
+
+    private void onMetaDataChanged(MediaMetadata metadata) {
+        if (getActivity() == null) {
+            Log.w("onMetadataChanged", "onMetadataChanged called when getActivity null," +
+                    "this should not happen if the callback was properly unregistered. Ignoring.");
+            return;
+        }
+        if (metadata == null) {
+            return;
+        }
     }
 }
