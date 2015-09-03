@@ -18,9 +18,9 @@
         android:layout_marginLeft="8dp"
         android:orientation="vertical"
         android:layout_toEndOf="@id/album_art"
-        android:layout_toRightOf="@id/album_art"
-        android:layout_toStartOf="@id/play_pause"
-        android:layout_toLeftOf="@id/play_pause"
+        android:layout_toRightOf="@+id/album_art"
+        android:layout_toStartOf="@+id/play_pause"
+        android:layout_toLeftOf="@+id/play_pause"
         android:layout_centerVertical="true"
         android:layout_height="wrap_content">
         <TextView

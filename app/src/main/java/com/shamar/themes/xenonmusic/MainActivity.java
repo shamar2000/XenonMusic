@@ -28,8 +28,8 @@ import java.util.Comparator;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class MainActivity extends AppCompatActivity implements MediaPlayerControl,
-        MediaBrowserFragment.MediaFragmentListener {
+public class MainActivity extends AppCompatActivity implements MediaPlayerControl
+       {
 
     private ArrayList<Song> mSongList;
     public ListView         mSongView;
